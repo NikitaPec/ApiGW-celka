@@ -39,7 +39,11 @@ export default async function (req, res, next) {
         `Пользователь с почтовым адресом ${email} уже существует`
       );
     }
-    if (errors.email.length || errors.password || errors.email) {
+    if (
+      errors.email.length > 0 ||
+      errors.password.length > 0 ||
+      errors.email.length > 0
+    ) {
       return next(ApiError.ValidationException("Ошибка валидации", errors));
     }
     return next();
