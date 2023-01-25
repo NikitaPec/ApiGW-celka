@@ -8,21 +8,25 @@ export default async function (req, res, next) {
     const regularValidMail = /^[\w-\.]+@[\w-]+\.[a-z]{2,4}$/i;
     const regularValidPhone = /^[\d\+][\d\(\)\ -]{4,14}\d$/;
     const regularValidPassword = /(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{6,12}/g;
-    const { email, password } = req.body;
-    if (!email || !password) {
+    const { email, password, confirm } = req.body;
+    const errors = { email: [], password: [], confirm: [] };
+    const validMail = regularValidMail.test(email);
+    const validPass = regularValidPassword.test(password);
+    const candidate = await User.findOne({ where: { email } });
+    if (!email || !password || !confirm) {
       if (!email) {
         errors.email.push("Поле обязательно для заполнения");
       }
       if (!password) {
         errors.password.push("Поле обязательно для заполнения");
       }
+      if (!confirm) {
+        errors.confirm.push("Поле обязательно для заполнения");
+      }
       return next(ApiError.ValidationException("Ошибка валидации", errors));
     }
-    const validMail = regularValidMail.test(email);
-    const validPass = regularValidPassword.test(password);
-    const candidate = await User.findOne({ where: { email } });
+
     if (!validMail || !validPass || candidate) {
-      const errors = { email: [], password: [] };
       if (!validMail) {
         errors.email.push("Некорректный адрес электронной почты");
       }
@@ -37,6 +41,9 @@ export default async function (req, res, next) {
         );
       }
       return next(ApiError.ValidationException("Ошибка валидации", errors));
+    }
+    if (password == confirm) {
+      errors.confirm.push("Пароли не совпадают");
     }
     return next();
   } catch (errors) {
