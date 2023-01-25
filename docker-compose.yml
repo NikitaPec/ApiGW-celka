@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  server:
+    container_name: auth_app
+    build:
+      context: .
+      dockerfile: _docker/auth/Dockerfile
+    volumes:
+      - .:/app:rw
+      - /app/node_modules
+    ports:
+      - 4000:4000
+    depends_on:
+      - db
+  db:
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./_docker/db:/var/lib/postgresql/data
+    container_name: auth_db
