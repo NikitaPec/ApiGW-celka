@@ -13,37 +13,34 @@ export default async function (req, res, next) {
     const validMail = regularValidMail.test(email);
     const validPass = regularValidPassword.test(password);
     const candidate = await User.findOne({ where: { email } });
-    if (!email || !password || !confirm) {
-      if (!email) {
-        errors.email.push("Поле обязательно для заполнения");
-      }
-      if (!password) {
-        errors.password.push("Поле обязательно для заполнения");
-      }
-      if (!confirm) {
-        errors.confirm.push("Поле обязательно для заполнения");
-      }
-      return next(ApiError.ValidationException("Ошибка валидации", errors));
-    }
 
-    if (!validMail || !validPass || candidate) {
-      if (!validMail) {
-        errors.email.push("Некорректный адрес электронной почты");
-      }
-      if (!validPass) {
-        errors.password.push(
-          "Пароль должен содержать строчные, прописные буквы и цифры а так же быть не менее 6 и не более 12 символов длинной"
-        );
-      }
-      if (candidate) {
-        errors.email.push(
-          `Пользователь с почтовым адресом ${email} уже существует`
-        );
-      }
-      return next(ApiError.ValidationException("Ошибка валидации", errors));
+    if (!email) {
+      errors.email.push("Поле обязательно для заполнения");
     }
-    if (password == confirm) {
+    if (!password) {
+      errors.password.push("Поле обязательно для заполнения");
+    }
+    if (!confirm) {
+      errors.confirm.push("Поле обязательно для заполнения");
+    }
+    if (password !== confirm) {
       errors.confirm.push("Пароли не совпадают");
+    }
+    if (!validMail) {
+      errors.email.push("Некорректный адрес электронной почты");
+    }
+    if (!validPass) {
+      errors.password.push(
+        "Пароль должен содержать строчные, прописные буквы и цифры а так же быть не менее 6 и не более 12 символов длинной"
+      );
+    }
+    if (candidate) {
+      errors.email.push(
+        `Пользователь с почтовым адресом ${email} уже существует`
+      );
+    }
+    if (errors.email.length || errors.password || errors.email) {
+      return next(ApiError.ValidationException("Ошибка валидации", errors));
     }
     return next();
   } catch (errors) {
