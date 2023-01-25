@@ -1,17 +1,18 @@
-import UserService from '../service/UserService.js';
-import ApiError from '../exception/ApiError.js';
+import UserService from "../service/UserService.js";
+import ApiError from "../exception/ApiError.js";
+import TokenService from "../service/TokenService.js";
 
 class UserController {
   async registration(req, res, next) {
     try {
       const { email, password } = req.body;
       const userData = await UserService.registration(email, password);
-      res.cookie('refreshToken', userData.refreshToken, {
+      res.cookie("refreshToken", userData.refreshToken, {
         maxAge: 2592000000,
         httpOnly: true,
       });
       userData.refreshToken = true;
-      return res.json({ success: 'true', errors:[], data: userData });
+      return res.json({ success: "true", errors: [], data: userData });
     } catch (error) {
       next(error);
     }
@@ -21,7 +22,7 @@ class UserController {
     try {
       const { email, password } = req.body;
       const userData = await UserService.login(email, password);
-      res.cookie('refreshToken', userData.refreshToken, {
+      res.cookie("refreshToken", userData.refreshToken, {
         maxAge: 2592000000,
         httpOnly: true,
       });
@@ -36,7 +37,7 @@ class UserController {
     try {
       const { refreshToken } = req.cookies;
       const token = await UserService.logout(refreshToken);
-      res.clearCookie('refreshToken');
+      res.clearCookie("refreshToken");
       return res.json(token);
     } catch (error) {
       next(error);
@@ -56,8 +57,9 @@ class UserController {
   async refresh(req, res, next) {
     try {
       const { refreshToken } = req.cookies;
+      console.log("1111111111111111111111111111111", refreshToken);
       const userData = await UserService.refresh(refreshToken);
-      res.cookie('refreshToken', userData.refreshToken, {
+      res.cookie("refreshToken", userData.refreshToken, {
         maxAge: 2592000000,
         httpOnly: true,
       });
@@ -68,12 +70,25 @@ class UserController {
     }
   }
 
-  async getUsers(req, res, next) {
+  async checkauth(req, res, next) {
     try {
-      const users = await UserService.getAllUsers();
-      return res.json(users);
+      const authorizationHeader = req.headers.authorizationheader;
+      if (!authorizationHeader) {
+        return next(ApiError.UnauthorizedError());
+      }
+      const accessToken = authorizationHeader.split(" ")[1];
+      if (!accessToken) {
+        console.log(accessToken);
+        return next(ApiError.UnauthorizedError());
+      }
+      const accessTokenValidate = TokenService.validateAccessToken(accessToken);
+      if (!accessTokenValidate) {
+        return next(ApiError.UnauthorizedError());
+      }
+
+      return res.json({ success: true });
     } catch (error) {
-      next(error);
+      return next(ApiError.UnauthorizedError());
     }
   }
 }
