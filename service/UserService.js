@@ -1,10 +1,10 @@
-import User from '../model/UserModel.js';
-import bcrypt from 'bcrypt';
-import { v4 as uuidv4 } from 'uuid';
-import MailService from './MailService.js';
-import TokenService from './TokenService.js';
-import UserDto from '../dto/UserDto.js';
-import ApiError from '../exception/ApiError.js';
+import User from "../model/UserModel.js";
+import bcrypt from "bcrypt";
+import { v4 as uuidv4 } from "uuid";
+import MailService from "./MailService.js";
+import TokenService from "./TokenService.js";
+import UserDto from "../dto/UserDto.js";
+import ApiError from "../exception/ApiError.js";
 
 class UserService {
   async registration(email, password) {
@@ -28,12 +28,12 @@ class UserService {
   async activate(activationLink) {
     const user = await User.findOne({ where: { activationLink } });
     if (!user) {
-      throw ApiError.BadRequest('Некорректная ссылка активации');
+      throw ApiError.BadRequest("Некорректная ссылка активации");
     }
     user.isActivated = true;
     await user.save();
   }
-  
+
   async login(email, password) {
     const user = await User.findOne({ where: { email } });
     if (!user) {
@@ -58,8 +58,9 @@ class UserService {
     if (!refreshToken) {
       throw ApiError.UnauthorizedError();
     }
-    const refreshTokenValidate =
-      TokenService.validateRefreshToken(refreshToken);
+    const refreshTokenValidate = TokenService.validateRefreshToken(
+      refreshToken
+    );
     const refreshTokenFromDB = await TokenService.findToken(refreshToken);
     if (!refreshTokenValidate || !refreshTokenFromDB) {
       throw ApiError.UnauthorizedError();

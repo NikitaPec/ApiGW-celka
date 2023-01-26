@@ -1,6 +1,7 @@
 import UserService from "../service/UserService.js";
 import ApiError from "../exception/ApiError.js";
 import TokenService from "../service/TokenService.js";
+import ApiResponse from "../dto/ApiResponseDto.js";
 
 class UserController {
   async registration(req, res, next) {
@@ -12,8 +13,9 @@ class UserController {
         httpOnly: true,
       });
       userData.refreshToken = true;
-      return res.json({ success: "true", errors: [], data: userData });
+      return res.json(new ApiResponse(userData));
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
