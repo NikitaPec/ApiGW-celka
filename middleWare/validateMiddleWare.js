@@ -13,7 +13,6 @@ export default async function (req, res, next) {
     const validMail = regularValidMail.test(email);
     const validPass = regularValidPassword.test(password);
     const candidate = await User.findOne({ where: { email } });
-    console.log(_.isEqual(confirm, password));
     if (!email) {
       errors.email
         ? errors.email.push("Поле обязательно для заполнения")
@@ -33,6 +32,7 @@ export default async function (req, res, next) {
       errors.confirm
         ? errors.confirm.push("Пароли не совпадают")
         : (errors.confirm = ["Пароли не совпадают"]);
+    } else {
     }
     if (!validMail) {
       errors.email
@@ -57,7 +57,7 @@ export default async function (req, res, next) {
             `Пользователь с почтовым адресом ${email} уже существует`,
           ]);
     }
-    if (errors.email || errors.password || errors.email) {
+    if (errors.email || errors.password || errors.confirm) {
       return res.json({ success: false, data: {}, errors: errors });
     }
     return next();
