@@ -9,45 +9,58 @@ export default async function (req, res, next) {
     const regularValidPhone = /^[\d\+][\d\(\)\ -]{4,14}\d$/;
     const regularValidPassword = /(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{6,12}/g;
     const { email, password, confirm } = req.body;
-    const errors = { email: [], password: [], confirm: [] };
+    const errors = {};
     const validMail = regularValidMail.test(email);
     const validPass = regularValidPassword.test(password);
     const candidate = await User.findOne({ where: { email } });
 
     if (!email) {
-      errors.email.push("Поле обязательно для заполнения");
+      errors.email
+        ? errors.email.push("Поле обязательно для заполнения")
+        : (errors.email = "Поле обязательно для заполнения");
     }
     if (!password) {
-      errors.password.push("Поле обязательно для заполнения");
+      errors.password
+        ? errors.password.push("Поле обязательно для заполнения")
+        : (errors.password = "Поле обязательно для заполнения");
     }
     if (!confirm) {
-      errors.confirm.push("Поле обязательно для заполнения");
+      errors.confirm
+        ? errors.confirm.push("Поле обязательно для заполнения")
+        : (errors.confirm = "Поле обязательно для заполнения");
     }
     if (password !== confirm) {
-      errors.confirm.push("Пароли не совпадают");
+      errors.confirm
+        ? errors.confirm.push("Пароли не совпадают")
+        : (errors.confirm = "Пароли не совпадают");
     }
     if (!validMail) {
-      errors.email.push("Некорректный адрес электронной почты");
+      errors.email
+        ? errors.email.push("Некорректный адрес электронной почты")
+        : (errors.email = "Некорректный адрес электронной почты");
     }
     if (!validPass) {
-      errors.password.push(
-        "Пароль должен содержать строчные, прописные буквы и цифры а так же быть не менее 6 и не более 12 символов длинной"
-      );
+      errors.password
+        ? errors.password.push(
+            "Пароль должен содержать строчные, прописные буквы и цифры а так же быть не менее 6 и не более 12 символов длинной"
+          )
+        : (errors.password =
+            "Пароль должен содержать строчные, прописные буквы и цифры а так же быть не менее 6 и не более 12 символов длинной");
     }
     if (candidate) {
-      errors.email.push(
-        `Пользователь с почтовым адресом ${email} уже существует`
-      );
+      errors.email
+        ? errors.email.push(
+            `Пользователь с почтовым адресом ${email} уже существует`
+          )
+        : (errors.email = `Пользователь с почтовым адресом ${email} уже существует`);
     }
-    if (
-      errors.email.length > 0 ||
-      errors.password.length > 0 ||
-      errors.email.length > 0
-    ) {
-      return next(ApiError.ValidationException("Ошибка валидации", errors));
+    if (errors.email || errors.password || errors.email) {
+      return res.json({ success: false, data: {}, errors: errors });
+      // return next(ApiError.ValidationException("Ошибка валидации", errors));
     }
     return next();
   } catch (errors) {
+    console.log(errors);
     next(errors);
   }
 }

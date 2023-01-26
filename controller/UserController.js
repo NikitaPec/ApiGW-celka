@@ -70,7 +70,7 @@ class UserController {
     }
   }
 
-  async checkauth(req, res, next) {
+  async checkAuth(req, res, next) {
     try {
       const authorizationHeader = req.headers.authorizationheader;
       if (!authorizationHeader) {
