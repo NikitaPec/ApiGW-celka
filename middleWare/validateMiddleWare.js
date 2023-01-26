@@ -1,6 +1,6 @@
 import ApiError from "../exception/ApiError.js";
 import User from "../model/UserModel.js";
-
+import _ from "lodash";
 export default async function (req, res, next) {
   try {
     const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
@@ -13,7 +13,7 @@ export default async function (req, res, next) {
     const validMail = regularValidMail.test(email);
     const validPass = regularValidPassword.test(password);
     const candidate = await User.findOne({ where: { email } });
-
+    console.log(_.isEqual(confirm, password));
     if (!email) {
       errors.email
         ? errors.email.push("Поле обязательно для заполнения")
@@ -29,7 +29,7 @@ export default async function (req, res, next) {
         ? errors.confirm.push("Поле обязательно для заполнения")
         : (errors.confirm = "Поле обязательно для заполнения");
     }
-    if (password !== confirm) {
+    if (_.isEqual(confirm, password) == false) {
       errors.confirm
         ? errors.confirm.push("Пароли не совпадают")
         : (errors.confirm = "Пароли не совпадают");
@@ -56,11 +56,9 @@ export default async function (req, res, next) {
     }
     if (errors.email || errors.password || errors.email) {
       return res.json({ success: false, data: {}, errors: errors });
-      // return next(ApiError.ValidationException("Ошибка валидации", errors));
     }
     return next();
   } catch (errors) {
-    console.log(errors);
     next(errors);
   }
 }
