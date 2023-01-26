@@ -57,7 +57,6 @@ class UserController {
   async refresh(req, res, next) {
     try {
       const { refreshToken } = req.cookies;
-      console.log("1111111111111111111111111111111", refreshToken);
       const userData = await UserService.refresh(refreshToken);
       res.cookie("refreshToken", userData.refreshToken, {
         maxAge: 2592000000,

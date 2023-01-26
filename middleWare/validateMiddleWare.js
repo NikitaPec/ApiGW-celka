@@ -17,42 +17,45 @@ export default async function (req, res, next) {
     if (!email) {
       errors.email
         ? errors.email.push("Поле обязательно для заполнения")
-        : (errors.email = "Поле обязательно для заполнения");
+        : (errors.email = ["Поле обязательно для заполнения"]);
     }
     if (!password) {
       errors.password
         ? errors.password.push("Поле обязательно для заполнения")
-        : (errors.password = "Поле обязательно для заполнения");
+        : (errors.password = ["Поле обязательно для заполнения"]);
     }
     if (!confirm) {
       errors.confirm
         ? errors.confirm.push("Поле обязательно для заполнения")
-        : (errors.confirm = "Поле обязательно для заполнения");
+        : (errors.confirm = ["Поле обязательно для заполнения"]);
     }
     if (_.isEqual(confirm, password) == false) {
       errors.confirm
         ? errors.confirm.push("Пароли не совпадают")
-        : (errors.confirm = "Пароли не совпадают");
+        : (errors.confirm = ["Пароли не совпадают"]);
     }
     if (!validMail) {
       errors.email
         ? errors.email.push("Некорректный адрес электронной почты")
-        : (errors.email = "Некорректный адрес электронной почты");
+        : (errors.email = ["Некорректный адрес электронной почты"]);
     }
     if (!validPass) {
       errors.password
         ? errors.password.push(
             "Пароль должен содержать строчные, прописные буквы и цифры а так же быть не менее 6 и не более 12 символов длинной"
           )
-        : (errors.password =
-            "Пароль должен содержать строчные, прописные буквы и цифры а так же быть не менее 6 и не более 12 символов длинной");
+        : (errors.password = [
+            "Пароль должен содержать строчные, прописные буквы и цифры а так же быть не менее 6 и не более 12 символов длинной",
+          ]);
     }
     if (candidate) {
       errors.email
         ? errors.email.push(
             `Пользователь с почтовым адресом ${email} уже существует`
           )
-        : (errors.email = `Пользователь с почтовым адресом ${email} уже существует`);
+        : (errors.email = [
+            `Пользователь с почтовым адресом ${email} уже существует`,
+          ]);
     }
     if (errors.email || errors.password || errors.email) {
       return res.json({ success: false, data: {}, errors: errors });
