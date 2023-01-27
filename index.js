@@ -1,6 +1,3 @@
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
-import swaggerAutogen from "swagger-autogen";
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
@@ -10,14 +7,6 @@ import router from "./router/index.js";
 import errorMiddleWare from "./middleWare/errorMiddleWare.js";
 
 const PORT = process.env.PORT;
-const _dirname = dirname(fileURLToPath(import.meta.url));
-const outputFile = join(_dirname, "output.json");
-const endpointsFiles = [join(_dirname, "./router/index.js")];
-//swaggerAutogen(/*options*/)(outputFile, endpointsFiles, doc).then(
-// ({ success }) => {
-//   console.log(`Generated: ${success}`);
-// }
-//);
 
 const app = express();
 app.use(express.json());

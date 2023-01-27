@@ -1,12 +1,13 @@
 import { Router } from "express";
 import UserController from "../controller/UserController.js";
+import authMiddleWare from "../middleWare/authMiddleWare.js";
 import validateMiddleWare from "../middleWare/validateMiddleWare.js";
 const router = new Router();
 
 router.post("/registration", validateMiddleWare, UserController.registration);
 router.post("/login", UserController.login);
 router.post("/logout", UserController.logout);
-router.post("/check-auth", UserController.checkAuth);
+router.post("/check-auth", authMiddleWare, UserController.checkAuth);
 router.get("/activate/:link", UserController.activate);
 router.get("/refresh", UserController.refresh);
 

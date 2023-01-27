@@ -9,11 +9,11 @@ export default class ApiResponse {
   setError(name, message) {
     Object.keys(this.errors).includes(name)
       ? this.errors[name].push(message)
-      : (this.errors[name] = [name]);
+      : (this.errors[name] = [message]);
   }
 
-  setData(data) {
-    this.data = data;
+  static setData(data) {
+    return new ApiResponse(data);
   }
 
   isSuccess() {

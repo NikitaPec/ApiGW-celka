@@ -9,8 +9,8 @@ export default class ApiError extends Error {
     this.response = response;
   }
 
-  static UnauthorizedError() {
-    return new ApiError(401, "Ошибка авторизации");
+  static UnauthorizedError(response) {
+    return new ApiError(401, response);
   }
 
   static BadRequest(message, errors = {}) {

@@ -13,7 +13,7 @@ class UserController {
         httpOnly: true,
       });
       userData.refreshToken = true;
-      return res.json(new ApiResponse(userData));
+      return res.json(ApiResponse.setData(userData));
     } catch (error) {
       console.log(error);
       next(error);
@@ -29,7 +29,7 @@ class UserController {
         httpOnly: true,
       });
       userData.refreshToken = true;
-      return res.json(userData);
+      return res.json(ApiResponse.setData(userData));
     } catch (error) {
       next(error);
     }
@@ -40,7 +40,7 @@ class UserController {
       const { refreshToken } = req.cookies;
       const token = await UserService.logout(refreshToken);
       res.clearCookie("refreshToken");
-      return res.json(token);
+      return res.json(ApiResponse.setData(token));
     } catch (error) {
       next(error);
     }
@@ -65,7 +65,7 @@ class UserController {
         httpOnly: true,
       });
       userData.refreshToken = true;
-      return res.json(userData);
+      return res.json(ApiResponse.setData(userData));
     } catch (error) {
       next(error);
     }
@@ -73,23 +73,9 @@ class UserController {
 
   async checkAuth(req, res, next) {
     try {
-      const authorizationHeader = req.headers.authorizationheader;
-      if (!authorizationHeader) {
-        return next(ApiError.UnauthorizedError());
-      }
-      const accessToken = authorizationHeader.split(" ")[1];
-      if (!accessToken) {
-        console.log(accessToken);
-        return next(ApiError.UnauthorizedError());
-      }
-      const accessTokenValidate = TokenService.validateAccessToken(accessToken);
-      if (!accessTokenValidate) {
-        return next(ApiError.UnauthorizedError());
-      }
-
-      return res.json({ success: true });
+      return res.json(ApiResponse.setData());
     } catch (error) {
-      return next(ApiError.UnauthorizedError());
+      return next(error);
     }
   }
 }
