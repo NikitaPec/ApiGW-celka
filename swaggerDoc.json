@@ -1,0 +1,112 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "authAPI",
+        "version": "1.0.0",
+        "description": "Данный сервис позволяет проводить аутентификацию регистрацию и авторизацию пользователя по средствам токенов доступа."
+    },
+    "servers": [
+        {
+            "url": "http://localhost:5000",
+            "description": "Local Dev."
+        }
+    ],
+    "tags": [
+        {
+            "name": "api",
+            "description": "api routes"
+        }
+    ],
+    "paths": {
+        "/api/registration": {
+            "post": {
+                "tags": [
+                    "api"
+                ],
+                "description": "Регистрация нового пользователя.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "description": "Почтовый адрес клиента",
+                                        "example": "Max@mail.ru"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "description": "Пароль клиента",
+                                        "example": "1234Qq"
+                                    },
+                                    "confirm": {
+                                        "type": "string",
+                                        "description": "Пароль клиента",
+                                        "example": "1234Qq"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Регистрация нового пользователя прошла успешно.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "example": {
+                                        "success": "true",
+                                        "data": {
+                                            "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Ik1hYnhAbWFpbC5ydSIsImlkIjozNSwiaXNBY3RpdmF0ZWQiOmZhbHNlLCJuYW1lIjpudWxsLCJyb2xlIjpudWxsLCJpYXQiOjE2NzQ4NDY4MzYsImV4cCI6MTY3NDg0ODYzNn0.dip9G1CqaY181sSwKzR8COyCJJvCHGuV4beHpunWZb8",
+                                            "refreshToken": "true",
+                                            "user": {
+                                                "email": "Mabx@mail.ru",
+                                                "id": "35",
+                                                "isActivated": "false",
+                                                "name": "null",
+                                                "role": "null"
+                                            }
+                                        },
+                                        "errors": {}
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "417": {
+                        "description": "Ошибка валидации.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "example": {
+                                        "success": "false",
+                                        "data": {},
+                                        "errors": {
+                                            "email": [
+                                                "Поле обязательно для заполнения",
+                                                "Некорректный адрес электронной почты",
+                                                "Пользователь с почтовым адресом Mabx@mail.ru уже существует"
+                                            ],
+                                            "password": [
+                                                "Поле обязательно для заполнения",
+                                                "Пароль должен содержать строчные, прописные буквы и цифры а так же быть не менее 6 и не более 12 символов длинной"
+                                            ],
+                                            "confirm": [
+                                                "Поле обязательно для заполнения",
+                                                "Пароли не совпадают"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
