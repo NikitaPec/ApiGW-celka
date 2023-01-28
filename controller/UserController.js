@@ -6,8 +6,8 @@ import ApiResponse from "../dto/ApiResponseDto.js";
 class UserController {
   async registration(req, res, next) {
     try {
-      const { email, password } = req.body;
-      const userData = await UserService.registration(email, password);
+      const { login, password } = req.body;
+      const userData = await UserService.registration(login, password);
       res.cookie("refreshToken", userData.refreshToken, {
         maxAge: 2592000000,
         httpOnly: true,
@@ -22,8 +22,8 @@ class UserController {
 
   async login(req, res, next) {
     try {
-      const { email, password } = req.body;
-      const userData = await UserService.login(email, password);
+      const { login, password } = req.body;
+      const userData = await UserService.login(login, password);
       res.cookie("refreshToken", userData.refreshToken, {
         maxAge: 2592000000,
         httpOnly: true,

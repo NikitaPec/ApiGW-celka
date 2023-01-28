@@ -52,6 +52,15 @@
                 },
                 "responses": {
                     "200": {
+                        "headers": {
+                            "Set-Cookie": {
+                                "description": "Токен обновления",
+                                "schema": {
+                                    "type": "string",
+                                    "example": "refreshToken"
+                                }
+                            }
+                        },
                         "description": "Регистрация нового пользователя прошла успешно.",
                         "content": {
                             "application/json": {
@@ -106,6 +115,46 @@
                         }
                     }
                 }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "api"
+                ],
+                "description": "login."
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "api"
+                ],
+                "description": "logout."
+            }
+        },
+        "/api/check-auth": {
+            "post": {
+                "tags": [
+                    "api"
+                ],
+                "description": "Проверка токена доступа."
+            }
+        },
+        "/api/activate/:link": {
+            "get": {
+                "tags": [
+                    "api"
+                ],
+                "description": "Подтверждение почтового ящика."
+            }
+        },
+        "/api/refresh": {
+            "get": {
+                "tags": [
+                    "api"
+                ],
+                "description": "Обновление токена доступа."
             }
         }
     }

@@ -6,21 +6,23 @@ import TokenService from "./TokenService.js";
 import UserDto from "../dto/UserDto.js";
 import ApiError from "../exception/ApiError.js";
 
+function LoginTypeChecking(login) {
+  return login.indexOf("@") >= 0 ? "email" : "phone";
+}
+
 class UserService {
-  async registration(email, password) {
+  async registration(login, password) {
+    const loginType = LoginTypeChecking(login);
     const hashPassword = await bcrypt.hash(password, 3);
     const activationLink = uuidv4();
     const user = await User.create({
-      email,
+      [loginType]: login,
       password: hashPassword,
       activationLink,
     });
-    await MailService.sendActivationMail(
-      email,
-      `${process.env.API_URL}/api/activate/${activationLink}`
-    );
+    //await MailService.sendActivationMail(email, `${process.env.API_URL}/api/activate/${activationLink}`);
     const userDto = new UserDto(user);
-    const tokens = TokenService.generateTokens({ ...userDto });
+    const tokens = TokenService.generateTokens({ password: hashPassword });
     await TokenService.saveToken(userDto.id, tokens.refreshToken);
     return { ...tokens, user: userDto };
   }
@@ -34,19 +36,19 @@ class UserService {
     await user.save();
   }
 
-  async login(email, password) {
-    const user = await User.findOne({ where: { email } });
+  async login(login, password) {
+    const loginType = LoginTypeChecking(login);
+    const user = await User.findOne({ where: { [loginType]: login } });
     if (!user) {
-      throw ApiError.BadRequest(
-        `Пользователь с почтовым адресом ${email} не существует`
-      );
+      throw ApiError.BadRequest(`Пользователь с почтовым адресом ${email} не существует`);
     }
     const passwordCheck = await bcrypt.compare(password, user.password);
     if (!passwordCheck) {
       throw ApiError.BadRequest(`Неверный пароль`);
     }
+    const hashPassword = user.password;
     const userDto = new UserDto(user);
-    const tokens = TokenService.generateTokens({ ...userDto });
+    const tokens = TokenService.generateTokens({ password: hashPassword });
     await TokenService.saveToken(userDto.id, tokens.refreshToken);
     return { ...tokens, user: userDto };
   }
@@ -58,17 +60,16 @@ class UserService {
     if (!refreshToken) {
       throw ApiError.UnauthorizedError();
     }
-    const refreshTokenValidate = TokenService.validateRefreshToken(
-      refreshToken
-    );
+    const refreshTokenValidate = TokenService.validateRefreshToken(refreshToken);
     const refreshTokenFromDB = await TokenService.findToken(refreshToken);
     if (!refreshTokenValidate || !refreshTokenFromDB) {
       throw ApiError.UnauthorizedError();
     }
     const id = refreshTokenFromDB.userId;
     const user = await User.findOne({ where: { id } });
+    const hashPassword = user.password;
     const userDto = new UserDto(user);
-    const tokens = TokenService.generateTokens({ ...userDto });
+    const tokens = TokenService.generateTokens({ password: hashPassword });
     await TokenService.saveToken(userDto.id, tokens.refreshToken);
     return { ...tokens, user: userDto };
   }

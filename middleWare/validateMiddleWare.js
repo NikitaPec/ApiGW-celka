@@ -5,36 +5,49 @@ import _ from "lodash";
 export default async function (req, res, next) {
   try {
     const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-    console.log("адрессс", req.socket.remoteAddress);
+    const { login = false, password = false, confirm = false } = req.body;
     const regularValidMail = /^[\w-\.]+@[\w-]+\.[a-z]{2,4}$/i;
-    const regularValidPhone = /^[\d\+][\d\(\)\ -]{4,14}\d$/;
+    const regularValidPhone = /\+7\(\d{3}\)\d{3}-\d{2}-\d{2}/;
     const regularValidPassword = /(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{6,12}/g;
-    const { email, password, confirm } = req.body;
-    const validMail = regularValidMail.test(email);
+    const phoneForm = login.replace(/(\+7|8)[\s(]?(\d{3})[\s)]?(\d{3})[\s-]?(\d{2})[\s-]?(\d{2})/g, "+7($2)$3-$4-$5");
+    const validMail = regularValidMail.test(login);
+    const validPhone = regularValidPhone.test(phoneForm);
     const validPass = regularValidPassword.test(password);
-    const candidate = await User.findOne({ where: { email } });
     const response = new ApiResponse();
-    if (!email) response.setError("email", "Поле обязательно для заполнения");
-    if (!password)
-      response.setError("password", "Поле обязательно для заполнения");
-    if (!confirm)
-      response.setError("confirm", "Поле обязательно для заполнения");
-    if (_.isEqual(confirm, password) == false)
-      response.setError("confirm", "Пароли не совпадают");
-    if (!validMail)
-      response.setError("email", "Некорректный адрес электронной почты");
+    async function candidate(value) {
+      return User.findOne({ where: value });
+    }
+    function LoginTypeChecking(login) {
+      return login.indexOf("@") >= 0 ? "email" : "phone";
+    }
+    const loginType = LoginTypeChecking(login);
+    if (!login) {
+      response.setError("login", "Поле обязательно для заполнения");
+    } else {
+      switch (loginType) {
+        case "email":
+          if (!validMail) response.setError("login", "Некорректный адрес электронной почты");
+          if (await candidate({ [loginType]: login }))
+            response.setError("login", `Пользователь с почтовым адресом ${login} уже существует`);
+          break;
+        case "phone":
+          if (!validPhone) response.setError("login", "Некорректный номер телефона");
+          if (await candidate({ [loginType]: phoneForm }))
+            response.setError("login", `Пользователь с номером ${phoneForm} уже существует`);
+          break;
+        default:
+      }
+    }
+    if (!password) response.setError("password", "Поле обязательно для заполнения");
+    if (!confirm) response.setError("confirm", "Поле обязательно для заполнения");
+    if (_.isEqual(confirm, password) == false) response.setError("confirm", "Пароли не совпадают");
     if (!validPass)
       response.setError(
         "password",
         "Пароль должен содержать строчные, прописные буквы и цифры а так же быть не менее 6 и не более 12 символов длинной"
       );
-    if (candidate)
-      response.setError(
-        "email",
-        `Пользователь с почтовым адресом ${email} уже существует`
-      );
-
     if (response.isSuccess()) {
+      loginType == "phone" ? (req.body.login = phoneForm) : true;
       return next();
     } else {
       return next(ApiError.ValidationException(response));
