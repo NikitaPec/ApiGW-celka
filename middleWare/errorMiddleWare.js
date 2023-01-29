@@ -4,6 +4,5 @@ export default function (err, req, res, next) {
   if (err instanceof ApiError) {
     return res.status(err.status).json(err.response);
   }
-  console.log(err);
-  return res.status(500).json({ success: false, message: "Oops" });
+  return res.status(500).json({ success: false, data: {}, error: { server: [`${err}`] } });
 }

@@ -23,7 +23,7 @@
                 "tags": [
                     "api"
                 ],
-                "description": "Регистрация нового пользователя.",
+                "description": "Регистрация нового пользователя. Принимает 3 поля. Поле login - в поле возможно указать почтовый адрес или номер телефона валидация и определение типа происходит на стороне сервера. Поле password - пароль пользователя, валидация происходит на стороне сервера. Поле confirm - валидация и проверка происходит на стороне сервера. После успешной регистрации в cookie записывается токен refreshToken.",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -33,7 +33,7 @@
                                     "login": {
                                         "type": "string",
                                         "description": "Почтовый адрес клиента или номер нелефона клиента формат не важен",
-                                        "example": "Max@mail.ru или +7(000)000-00-00"
+                                        "example": "Max@mail.ru"
                                     },
                                     "password": {
                                         "type": "string",
@@ -125,7 +125,88 @@
                 "tags": [
                     "api"
                 ],
-                "description": "login."
+                "description": "Авторизация пользователя. Принимает 2 поля. Поле login - Логин пользователя почтовый адрес или номер телефона, определение типа происходит на стороне сервера. Поле password - Пароль пользователя. После успешной Авторизации в cookie записывается токен refreshToken.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "login": {
+                                        "type": "string",
+                                        "description": "Почтовый адрес клиента или номер нелефона клиента формат не важен",
+                                        "example": "Max@mail.ru"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "description": "Пароль клиента",
+                                        "example": "1234Qq"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "headers": {
+                            "Set-Cookie": {
+                                "description": "Токен обновления",
+                                "schema": {
+                                    "type": "string",
+                                    "example": "refreshToken"
+                                }
+                            }
+                        },
+                        "description": "Авторизация пользователя прошла успешно.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "example": {
+                                        "success": "true",
+                                        "data": {
+                                            "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Ik1hYnhAbWFpbC5ydSIsImlkIjozNSwiaXNBY3RpdmF0ZWQiOmZhbHNlLCJuYW1lIjpudWxsLCJyb2xlIjpudWxsLCJpYXQiOjE2NzQ4NDY4MzYsImV4cCI6MTY3NDg0ODYzNn0.dip9G1CqaY181sSwKzR8COyCJJvCHGuV4beHpunWZb8",
+                                            "refreshToken": "true",
+                                            "user": {
+                                                "email": "Mabx@mail.ru",
+                                                "phone": "+7(000)000-00-00",
+                                                "id": "35",
+                                                "isActivated": "false",
+                                                "name": "null",
+                                                "role": "null"
+                                            }
+                                        },
+                                        "errors": {}
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "example": {
+                                        "success": "false",
+                                        "data": {},
+                                        "errors": {
+                                            "login": [
+                                                "Пользователь с почтовым адресом Mabx@mail.ru не существует",
+                                                "Пользователь с номером телефона +7(000)000-00-00 не существует"
+                                            ],
+                                            "password": [
+                                                "Неверный пароль"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/logout": {
