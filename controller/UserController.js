@@ -7,13 +7,13 @@ class UserController {
   async registration(req, res, next) {
     try {
       const { login, password } = req.body;
-      const userData = await UserService.registration(login, password);
-      res.cookie("refreshToken", userData.refreshToken, {
+      const apiResponse = await UserService.registration(login, password);
+      res.cookie("refreshToken", apiResponse.data.refreshToken, {
         maxAge: 2592000000,
         httpOnly: true,
       });
-      userData.refreshToken = true;
-      return res.json(ApiResponse.setData(userData));
+      apiResponse.data.refreshToken = true;
+      return res.json(apiResponse);
     } catch (error) {
       console.log(error);
       next(error);
@@ -23,14 +23,15 @@ class UserController {
   async login(req, res, next) {
     try {
       const { login, password } = req.body;
-      const userData = await UserService.login(login, password);
-      res.cookie("refreshToken", userData.refreshToken, {
+      const apiResponse = await UserService.login(login, password);
+      res.cookie("refreshToken", apiResponse.data.refreshToken, {
         maxAge: 2592000000,
         httpOnly: true,
       });
-      userData.refreshToken = true;
-      return res.json(ApiResponse.setData(userData));
+      apiResponse.data.refreshToken = true;
+      return res.json(apiResponse);
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
@@ -38,10 +39,11 @@ class UserController {
   async logout(req, res, next) {
     try {
       const { refreshToken } = req.cookies;
-      const token = await UserService.logout(refreshToken);
+      const apiResponse = await UserService.logout(refreshToken);
       res.clearCookie("refreshToken");
-      return res.json(ApiResponse.setData(token));
+      return res.json(apiResponse);
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
@@ -52,6 +54,7 @@ class UserController {
       await UserService.activate(activatationLink);
       return res.redirect(process.env.CLIENT_URL);
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
@@ -59,14 +62,15 @@ class UserController {
   async refresh(req, res, next) {
     try {
       const { refreshToken } = req.cookies;
-      const userData = await UserService.refresh(refreshToken);
-      res.cookie("refreshToken", userData.refreshToken, {
+      const apiResponse = await UserService.refresh(refreshToken);
+      res.cookie("refreshToken", apiResponse.data.refreshToken, {
         maxAge: 2592000000,
         httpOnly: true,
       });
-      userData.refreshToken = true;
-      return res.json(ApiResponse.setData(userData));
+      apiResponse.data.refreshToken = true;
+      return res.json(apiResponse);
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
@@ -75,7 +79,8 @@ class UserController {
     try {
       return res.json(ApiResponse.setData());
     } catch (error) {
-      return next(error);
+      console.log(error);
+      next(error);
     }
   }
 }

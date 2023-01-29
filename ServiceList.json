@@ -1,0 +1,14 @@
+[
+    {
+        "name": "authorization",
+        "rout": "/auth",
+        "url": "http://localhost:5001",
+        "status": true
+    },
+    {
+        "name": "authorization",
+        "rout": "/reg",
+        "url": "http://localhost:5001",
+        "status": false
+    }
+]

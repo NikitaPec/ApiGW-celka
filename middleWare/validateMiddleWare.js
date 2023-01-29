@@ -47,7 +47,6 @@ export default async function (req, res, next) {
         "Пароль должен содержать строчные, прописные буквы и цифры а так же быть не менее 6 и не более 12 символов длинной"
       );
     if (response.isSuccess()) {
-      loginType == "phone" ? (req.body.login = phoneForm) : true;
       return next();
     } else {
       return next(ApiError.ValidationException(response));
