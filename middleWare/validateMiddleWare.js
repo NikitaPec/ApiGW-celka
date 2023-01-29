@@ -5,7 +5,7 @@ import _ from "lodash";
 export default async function (req, res, next) {
   try {
     const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-    const { login = false, password = false, confirm = false } = req.body;
+    const { login = "", password = "", confirm = "" } = req.body;
     const regularValidMail = /^[\w-\.]+@[\w-]+\.[a-z]{2,4}$/i;
     const regularValidPhone = /\+7\(\d{3}\)\d{3}-\d{2}-\d{2}/;
     const regularValidPassword = /(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{6,12}/g;
