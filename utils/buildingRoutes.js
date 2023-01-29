@@ -1,11 +1,9 @@
 import httpProxy from "express-http-proxy";
+import fs from "fs";
 import { app } from "../index.js";
 import authMiddleWare from "../middleWare/authMiddleWare.js";
-const { default: SList } = await import("../ServiceList.json", {
-  assert: {
-    type: "json",
-  },
-});
+
+const SList = JSON.parse(fs.readFileSync("./ServiceList.json", "utf-8"));
 
 export default function creatingRoutesService() {
   SList.forEach((service) => {

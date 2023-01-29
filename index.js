@@ -1,4 +1,5 @@
 import "dotenv/config";
+import fs from "fs";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -10,11 +11,7 @@ import errorMiddleWare from "./middleWare/errorMiddleWare.js";
 //import clearLogs from "./utils/clearLog.js";
 import creatingRoutesService from "./utils/buildingRoutes.js";
 
-const { default: swaggerDoc } = await import("./swaggerDoc.json", {
-  assert: {
-    type: "json",
-  },
-});
+const swaggerDoc = JSON.parse(fs.readFileSync("./swaggerDoc.json", "utf-8"));
 
 const PORT = process.env.PORT;
 
