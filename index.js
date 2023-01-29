@@ -1,16 +1,13 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import fs from "fs";
-import { resolve } from "path";
 import cookieParser from "cookie-parser";
 import swagger from "swagger-ui-express";
 import Sequelize from "./db.js";
 import router from "./router/index.js";
 import errorMiddleWare from "./middleWare/errorMiddleWare.js";
-import { CronJob } from "cron";
-import morgan from "morgan";
-import clearLogs from "./utils/clearLog.js";
+//import { CronJob } from "cron";
+//import clearLogs from "./utils/clearLog.js";
 import creatingRoutesService from "./utils/buildingRoutes.js";
 
 const { default: swaggerDoc } = await import("./swaggerDoc.json", {
@@ -18,9 +15,10 @@ const { default: swaggerDoc } = await import("./swaggerDoc.json", {
     type: "json",
   },
 });
+
 const PORT = process.env.PORT;
 
-const startClearLog = new CronJob(
+/*const startClearLog = new CronJob(
   "15 3 * * 1",
   function () {
     clearLogs();
@@ -29,13 +27,8 @@ const startClearLog = new CronJob(
   true,
   "Europe/Moscow"
 );
-
+*/
 export const app = express();
-app.use(
-  morgan("combined", {
-    stream: fs.createWriteStream(resolve(process.cwd(), "logs", `${new Date().toLocaleDateString()}.log`)),
-  })
-);
 app.use(express.json());
 app.use(cookieParser());
 app.use(
