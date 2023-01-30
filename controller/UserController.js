@@ -15,7 +15,16 @@ class UserController {
       apiResponse.data.refreshToken = true;
       return res.json(apiResponse);
     } catch (error) {
-      console.log(error);
+      next(error);
+    }
+  }
+
+  async passwordRecovery(req, res, next) {
+    try {
+      const { login = "" } = req.body;
+      const apiResponse = await UserService.passwordRecovery(login);
+      return res.json(apiResponse);
+    } catch (error) {
       next(error);
     }
   }
@@ -31,7 +40,6 @@ class UserController {
       apiResponse.data.refreshToken = true;
       return res.json(apiResponse);
     } catch (error) {
-      console.log(error);
       next(error);
     }
   }
@@ -43,7 +51,6 @@ class UserController {
       res.clearCookie("refreshToken");
       return res.json(apiResponse);
     } catch (error) {
-      console.log(error);
       next(error);
     }
   }
@@ -54,7 +61,6 @@ class UserController {
       await UserService.activate(activatationLink);
       return res.redirect(process.env.CLIENT_URL);
     } catch (error) {
-      console.log(error);
       next(error);
     }
   }
@@ -70,7 +76,6 @@ class UserController {
       apiResponse.data.refreshToken = true;
       return res.json(apiResponse);
     } catch (error) {
-      console.log(error);
       next(error);
     }
   }
@@ -79,7 +84,6 @@ class UserController {
     try {
       return res.json(ApiResponse.setData());
     } catch (error) {
-      console.log(error);
       next(error);
     }
   }

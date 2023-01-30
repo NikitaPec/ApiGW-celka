@@ -2,7 +2,8 @@ export default class UserDto {
   email;
   phone;
   id;
-  isActivated;
+  isActivatedEmail;
+  isActivatedPhone;
   name;
   role;
 
@@ -10,7 +11,8 @@ export default class UserDto {
     this.phone = model.phone;
     this.email = model.email;
     this.id = model.id;
-    this.isActivated = model.isActivated;
+    this.isActivatedEmail = model.isActivatedEmail;
+    this.isActivatedPhone = model.isActivatedPhone;
     this.name = model.name;
     this.role = model.role;
   }

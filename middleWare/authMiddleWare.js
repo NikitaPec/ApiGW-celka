@@ -8,23 +8,13 @@ export default function (req, res, next) {
     const response = new ApiResponse();
 
     if (!authorizationHeader) {
-      response.setError(
-        "headerAuthorization",
-        "Отсутствует Header authorization"
-      );
+      response.setError("headerAuthorization", "Отсутствует Header authorization");
     } else {
       const accessToken = authorizationHeader.split(" ")[1];
-      if (!accessToken)
-        response.setError("accessToken", "Отсутствует токен доступа");
+      if (!accessToken) response.setError("accessToken", "Отсутствует токен доступа");
       else {
-        const accessTokenValidate = TokenService.validateAccessToken(
-          accessToken
-        );
-        if (!accessTokenValidate)
-          response.setError(
-            "accessToken",
-            "Токен доступа не прошел проверку подлинности"
-          );
+        const accessTokenValidate = TokenService.validateAccessToken(accessToken);
+        if (!accessTokenValidate) response.setError("accessToken", "Токен доступа не прошел проверку подлинности");
       }
     }
 
@@ -34,7 +24,6 @@ export default function (req, res, next) {
       return next(ApiError.UnauthorizedError(response));
     }
   } catch (error) {
-    console.log(error);
     return next(error);
   }
 }

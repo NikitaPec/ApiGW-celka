@@ -5,6 +5,7 @@ import validateMiddleWare from "../middleWare/validateMiddleWare.js";
 const router = new Router();
 
 router.post("/registration", validateMiddleWare, UserController.registration);
+router.post("/password-recovery", UserController.passwordRecovery);
 router.post("/login", UserController.login);
 router.post("/logout", UserController.logout);
 router.get("/check-auth", authMiddleWare, UserController.checkAuth);

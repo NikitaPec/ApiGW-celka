@@ -14,7 +14,7 @@ import creatingRoutesService from "./utils/buildingRoutes.js";
 const swaggerDoc = JSON.parse(fs.readFileSync("./swaggerDoc.json", "utf-8"));
 
 const PORT = process.env.PORT;
-
+("./logger/error.log");
 /*const startClearLog = new CronJob(
   "15 3 * * 1",
   function () {
@@ -44,9 +44,7 @@ const start = async () => {
     await Sequelize.authenticate();
     await Sequelize.sync();
     app.listen(PORT);
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) {}
 };
 
 start();

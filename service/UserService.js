@@ -13,6 +13,19 @@ function LoginTypeChecking(login) {
 function phoneNormalization(phone) {
   return phone.replace(/(\+7|8)[\s(]?(\d{3})[\s)]?(\d{3})[\s-]?(\d{2})[\s-]?(\d{2})/g, "+7($2)$3-$4-$5");
 }
+async function checkLogin(login, apiResponse) {
+  let messageBadLogin = `Пользователь с почтовым адресом ${login} не существует`;
+  const loginType = LoginTypeChecking(login);
+  if (loginType == "phone") {
+    login = phoneNormalization(login);
+    messageBadLogin = `Пользователь с номером телефона ${login} не существует`;
+  }
+  const user = await User.findOne({ where: { [loginType]: login } });
+  if (!user) {
+    apiResponse.setError("login", messageBadLogin);
+  }
+  return [user, loginType, login];
+}
 
 class UserService {
   async registration(login, password) {
@@ -26,6 +39,7 @@ class UserService {
       [loginType]: login,
       password: hashPassword,
       activationLink,
+      role: "user",
     });
     //await MailService.sendActivationMail(email, `${process.env.API_URL}/api/activate/${activationLink}`);
     const userDto = new UserDto(user);
@@ -47,18 +61,45 @@ class UserService {
     await user.save();
   }
 
-  async login(login, password) {
-    let messageBadLogin = `Пользователь с почтовым адресом ${login} не существует`;
+  async passwordRecovery(login) {
     const apiResponse = new ApiResponse();
-    const loginType = LoginTypeChecking(login);
-    if (loginType == "phone") {
-      login = phoneNormalization(login);
-      messageBadLogin = `Пользователь с номером телефона ${login} не существует`;
+    const [user, loginType, loginNormal] = await checkLogin(login, apiResponse);
+    const userDto = new UserDto(user);
+    if (apiResponse.isSuccess()) {
+      if (loginType == "phone") {
+        if (userDto.isActivatedPhone == false) {
+          apiResponse.setError(
+            "login",
+            `Восстановления пароля по номеру телефона ${loginNormal} не возможно, обратитесь в службу поддержки.`
+          );
+        } else {
+          //await функция по восстановлению пароля через телефон()
+          apiResponse.addData({
+            passwordRecovery: "Пароль был отправлен техтовым сообщением на ваш номер телефона.",
+          });
+        }
+      } else if (loginType == "email") {
+        if (userDto.isActivatedEmail == false) {
+          apiResponse.setError(
+            "login",
+            `Восстановления пароля по почтовому адресу ${loginNormal} не возможно, обратитесь в службу поддержки.`
+          );
+        } else {
+          //await функция по восстановлению пароля через почту()
+          apiResponse.addData({ passwordRecovery: "Пароль был отправлен на ваш почтовый адрес." });
+        }
+      }
     }
-    const user = await User.findOne({ where: { [loginType]: login } });
-    if (!user) {
-      apiResponse.setError("login", messageBadLogin);
-    } else {
+    if (!apiResponse.isSuccess()) {
+      throw ApiError.BadRequest(apiResponse);
+    }
+    return apiResponse;
+  }
+
+  async login(login, password) {
+    const apiResponse = new ApiResponse();
+    const [user, loginType, loginNormal] = await checkLogin(login, apiResponse);
+    if (apiResponse.isSuccess()) {
       const passwordCheck = await bcrypt.compare(password, user.password);
       if (!passwordCheck) {
         apiResponse.setError("password", "Неверный пароль");
@@ -75,8 +116,15 @@ class UserService {
     return apiResponse;
   }
   async logout(refreshToken) {
+    const apiResponse = new ApiResponse();
+    if (!refreshToken) {
+      apiResponse.setError("refreshToken", "Отсутствует токен в Cookies");
+    }
+    if (!apiResponse.isSuccess()) {
+      throw ApiError.BadRequest(apiResponse);
+    }
     const token = await TokenService.removeToken(refreshToken);
-    return ApiResponse.setData(token);
+    return apiResponse;
   }
 
   async refresh(refreshToken) {

@@ -52,7 +52,6 @@ export default async function (req, res, next) {
       return next(ApiError.ValidationException(response));
     }
   } catch (errors) {
-    console.log(errors);
     next(errors);
   }
 }

@@ -8,7 +8,8 @@ const User = sequelise.define("User", {
   name: { type: DataTypes.STRING },
   role: { type: DataTypes.STRING },
   phone: { type: DataTypes.STRING, unique: true },
-  isActivated: { type: DataTypes.BOOLEAN, defaultValue: false },
+  isActivatedEmail: { type: DataTypes.BOOLEAN, defaultValue: false },
+  isActivatedPhone: { type: DataTypes.BOOLEAN, defaultValue: false },
   activationLink: { type: DataTypes.STRING },
 });
 
