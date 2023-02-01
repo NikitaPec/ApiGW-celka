@@ -1,8 +1,9 @@
-import ApiResponse from "../dto/ApiResponseDto.js";
-import ApiError from "../exception/ApiError.js";
+import { NextFunction, Request, Response } from "express";
+import ApiResponse from "../../dto/ApiResponseDto.js";
+import ApiError from "../../exception/ApiError.js";
 import TokenService from "../service/TokenService.js";
 
-export default function (req, res, next) {
+export default function (req: Request, res: Response, next: NextFunction) {
   try {
     const authorizationHeader = req.headers.authorizationheader;
     const response = new ApiResponse();
@@ -10,7 +11,7 @@ export default function (req, res, next) {
     if (!authorizationHeader) {
       response.setError("headerAuthorization", "Отсутствует Header authorization");
     } else {
-      const accessToken = authorizationHeader.split(" ")[1];
+      const accessToken = String(authorizationHeader).split(" ")[1];
       if (!accessToken) response.setError("accessToken", "Отсутствует токен доступа");
       else {
         const accessTokenValidate = TokenService.validateAccessToken(accessToken);

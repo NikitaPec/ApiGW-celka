@@ -1,14 +1,20 @@
+interface errors {
+  [index: string]: Array<string>;
+}
+interface data {
+  [index: string]: string | boolean;
+}
 export default class ApiResponse {
   success = true;
-  data = {};
-  errors = {};
+  data: data = {};
+  errors: errors = {};
 
   constructor(data = {}) {
     this.data = data;
   }
-  setError(name, message) {
+  setError(name: string, message: string) {
     Object.keys(this.errors).includes(name) ? this.errors[name].push(message) : (this.errors[name] = [message]);
-    for (let key in this.errors) {
+    for (const key in this.errors) {
       if (this.errors[key].length > 0) {
         this.success = false;
         this.data = {};
@@ -16,16 +22,16 @@ export default class ApiResponse {
     }
   }
 
-  static setData(data) {
+  static setData(data?: object) {
     return new ApiResponse(data);
   }
 
-  addData(data) {
+  addData(data: object) {
     Object.assign(this.data, data);
   }
 
   isSuccess() {
-    for (let key in this.errors) {
+    for (const key in this.errors) {
       if (this.errors[key].length > 0) {
         this.success = false;
       }

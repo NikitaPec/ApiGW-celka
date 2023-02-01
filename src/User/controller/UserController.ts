@@ -1,10 +1,9 @@
 import UserService from "../service/UserService.js";
-import ApiError from "../exception/ApiError.js";
-import TokenService from "../service/TokenService.js";
-import ApiResponse from "../dto/ApiResponseDto.js";
+import ApiResponse from "../../dto/ApiResponseDto.js";
+import { NextFunction, Request, Response } from "express";
 
 class UserController {
-  async registration(req, res, next) {
+  async registration(req: Request, res: Response, next: NextFunction) {
     try {
       const { login = "", password = "" } = req.body;
       const apiResponse = await UserService.registration(login, password);
@@ -19,7 +18,7 @@ class UserController {
     }
   }
 
-  async passwordRecovery(req, res, next) {
+  async passwordRecovery(req: Request, res: Response, next: NextFunction) {
     try {
       const { login = "" } = req.body;
       const apiResponse = await UserService.passwordRecovery(login);
@@ -29,7 +28,7 @@ class UserController {
     }
   }
 
-  async login(req, res, next) {
+  async login(req: Request, res: Response, next: NextFunction) {
     try {
       const { login = "", password = "" } = req.body;
       const apiResponse = await UserService.login(login, password);
@@ -44,7 +43,7 @@ class UserController {
     }
   }
 
-  async logout(req, res, next) {
+  async logout(req: Request, res: Response, next: NextFunction) {
     try {
       const { refreshToken } = req.cookies;
       const apiResponse = await UserService.logout(refreshToken);
@@ -55,17 +54,28 @@ class UserController {
     }
   }
 
-  async activate(req, res, next) {
+  async activate(req: Request, res: Response, next: NextFunction) {
     try {
       const activatationLink = req.params.link;
       await UserService.activate(activatationLink);
-      return res.redirect(process.env.CLIENT_URL);
+      return res.redirect(process.env.CLIENT_URL as string);
     } catch (error) {
       next(error);
     }
   }
 
-  async refresh(req, res, next) {
+  async recovery(req: Request, res: Response, next: NextFunction) {
+    try {
+      const recoveryLink = req.params.link;
+      const apiResponse = await UserService.recovery(recoveryLink);
+      res.json(apiResponse);
+      return res.redirect(process.env.CLIENT_URL as string);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async refresh(req: Request, res: Response, next: NextFunction) {
     try {
       const { refreshToken } = req.cookies;
       const apiResponse = await UserService.refresh(refreshToken);
@@ -80,7 +90,7 @@ class UserController {
     }
   }
 
-  async checkAuth(req, res, next) {
+  async checkAuth(req: Request, res: Response, next: NextFunction) {
     try {
       return res.json(ApiResponse.setData());
     } catch (error) {

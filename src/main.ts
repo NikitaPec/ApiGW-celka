@@ -4,14 +4,14 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import swagger from "swagger-ui-express";
-import Sequelize from "./db.js";
-import router from "./router/index.js";
-import errorMiddleWare from "./middleWare/errorMiddleWare.js";
+import Sequelize from "./dataBase/db.js";
+import router from "./mainRouter/router.js";
+import errorMiddleWare from "./exception/middleWare/errorMiddleWare.js";
 //import { CronJob } from "cron";
 //import clearLogs from "./utils/clearLog.js";
 import creatingRoutesService from "./utils/buildingRoutes.js";
 
-const swaggerDoc = JSON.parse(fs.readFileSync("./swaggerDoc.json", "utf-8"));
+const swaggerDoc = JSON.parse(fs.readFileSync("./src/files/swaggerDoc.json", "utf-8"));
 
 const PORT = process.env.PORT;
 ("./logger/error.log");
