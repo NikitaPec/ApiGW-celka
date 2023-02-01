@@ -1,10 +1,11 @@
-import ApiError from "../exception/ApiError.js";
-import ApiResponse from "../dto/ApiResponseDto.js";
+import ApiError from "../../exception/ApiError.js";
+import ApiResponse from "../../dto/ApiResponseDto.js";
 import User from "../model/UserModel.js";
 import _ from "lodash";
-export default async function (req, res, next) {
+import { NextFunction, Request, Response } from "express";
+export default async function (req: Request, res: Response, next: NextFunction) {
   try {
-    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    //const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
     const { login = "", password = "", confirm = "" } = req.body;
     const regularValidMail = /^[\w-\.]+@[\w-]+\.[a-z]{2,4}$/i;
     const regularValidPhone = /\+7\(\d{3}\)\d{3}-\d{2}-\d{2}/;
@@ -14,10 +15,11 @@ export default async function (req, res, next) {
     const validPhone = regularValidPhone.test(phoneForm);
     const validPass = regularValidPassword.test(password);
     const response = new ApiResponse();
-    async function candidate(value) {
-      return User.findOne({ where: value });
+    async function candidate(value: { email?: string; phone?: string }) {
+      const f = await User.findOne({ where: value });
+      return f;
     }
-    function LoginTypeChecking(login) {
+    function LoginTypeChecking(login: string) {
       return login.indexOf("@") >= 0 ? "email" : "phone";
     }
     const loginType = LoginTypeChecking(login);

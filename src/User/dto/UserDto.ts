@@ -1,3 +1,13 @@
+interface model {
+  email: string | null;
+  phone: string | null;
+  id: string | number;
+  isActivatedEmail: boolean;
+  isActivatedPhone: boolean;
+  name: string | null;
+  role: string;
+}
+
 export default class UserDto {
   email;
   phone;
@@ -7,10 +17,10 @@ export default class UserDto {
   name;
   role;
 
-  constructor(model) {
+  constructor(model: model) {
     this.phone = model.phone;
     this.email = model.email;
-    this.id = model.id;
+    this.id = String(model.id);
     this.isActivatedEmail = model.isActivatedEmail;
     this.isActivatedPhone = model.isActivatedPhone;
     this.name = model.name;
