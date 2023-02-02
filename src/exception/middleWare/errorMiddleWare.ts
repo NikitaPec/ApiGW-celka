@@ -10,6 +10,7 @@ export default function (err: { status: number; response: object }, req: Request
     console.log(JSON.stringify(err));
     return res.status(500).json({ success: false, data: {}, error: { server: [`${err}`] } });
   } catch (error) {
+    console.log(JSON.stringify(error));
     next(error);
   }
 }

@@ -5,8 +5,8 @@ import { NextFunction, Request, Response } from "express";
 class UserController {
   async registration(req: Request, res: Response, next: NextFunction) {
     try {
-      const { login = "", password = "" } = req.body;
-      const apiResponse = await UserService.registration(login, password);
+      const { login = "", password = "", confirm = "" } = req.body;
+      const apiResponse = await UserService.registration(login, password, confirm);
       res.cookie("refreshToken", apiResponse.data.refreshToken, {
         maxAge: 2592000000,
         httpOnly: true,
@@ -66,8 +66,8 @@ class UserController {
 
   async recovery(req: Request, res: Response, next: NextFunction) {
     try {
-      const recoveryLink = req.params.link;
-      const apiResponse = await UserService.recovery(recoveryLink);
+      const { recoveryKey = "", password = "", confirm = "" } = req.body;
+      const apiResponse = await UserService.recovery(recoveryKey, password, confirm);
       res.json(apiResponse);
       return res.redirect(process.env.CLIENT_URL as string);
     } catch (error) {

@@ -5,32 +5,44 @@ import TokenService from "./TokenService.js";
 import UserDto from "../dto/UserDto.js";
 import ApiError from "../../exception/ApiError.js";
 import ApiResponse from "../../dto/ApiResponseDto.js";
+import Validdata from "../../utils/Validdata.js";
 
-function LoginTypeChecking(login: string) {
-  return login.indexOf("@") >= 0 ? "email" : "phone";
+function keyRecoveryGen() {
+  const symbols = "ABDEFGHKMNPQRSTWXZ123456789";
+  let key = "";
+  for (let i = 0; i < 4; i += 1) {
+    const position = Math.floor(Math.random() * symbols.length);
+    key += symbols.substring(position, position + 1);
+  }
+  return key;
 }
-function phoneNormalization(phone: string) {
-  return phone.replace(/(\+7|8)[\s(]?(\d{3})[\s)]?(\d{3})[\s-]?(\d{2})[\s-]?(\d{2})/g, "+7($2)$3-$4-$5");
-}
+
 async function checkLogin(login: string, apiResponse: ApiResponse) {
   let messageBadLogin = `Пользователь с почтовым адресом ${login} не существует`;
-  const loginType = LoginTypeChecking(login);
+  const loginType = Validdata.loginTupe(login);
   if (loginType == "phone") {
-    const loginNormal = phoneNormalization(login);
-    messageBadLogin = `Пользователь с номером телефона ${loginNormal} не существует`;
+    login = Validdata.phoneFormat(login);
+    messageBadLogin = `Пользователь с номером телефона ${login} не существует`;
   }
   const user = await User.findOne({ where: { [loginType]: login } });
-  if (!user) {
+  if (user == null) {
     apiResponse.setError("login", messageBadLogin);
   }
   return { user, loginType, login };
 }
 
 class UserService {
-  async registration(login: string, password: string) {
-    const loginType = LoginTypeChecking(login);
+  async registration(login: string, password: string, confirm: string) {
+    const apiResponse = new ApiResponse();
+    Validdata.checkLogin(login, apiResponse);
+    Validdata.checkPassword(password, confirm, apiResponse);
+    await Validdata.candidate(login, apiResponse);
+    if (!apiResponse.isSuccess()) {
+      throw ApiError.ValidationException(apiResponse);
+    }
+    const loginType = Validdata.loginTupe(login);
     if (loginType == "phone") {
-      login = phoneNormalization(login);
+      login = Validdata.phoneFormat(login);
     }
     const hashPassword = await bcrypt.hash(password, 3);
     const activationLink = uuidv4();
@@ -48,7 +60,8 @@ class UserService {
     const userDto = new UserDto(user);
     const tokens = TokenService.generateTokens({ password: hashPassword });
     await TokenService.saveToken(userDto.id, tokens.refreshToken);
-    return ApiResponse.setData({ ...tokens, user: userDto });
+    apiResponse.addData({ ...tokens, user: userDto });
+    return apiResponse;
   }
 
   async activate(activationLink: string) {
@@ -63,14 +76,22 @@ class UserService {
     }
   }
 
-  async recovery(recoveryLink: string) {
+  async recovery(recoveryKey: string, password: string, confirm: string) {
     const apiResponse = new ApiResponse();
-    const user = await User.findOne({ where: { recoveryLink } });
+    Validdata.checkPassword(password, confirm, apiResponse);
+    if (!apiResponse.isSuccess()) {
+      throw ApiError.ValidationException(apiResponse);
+    }
+    const user = await User.findOne({ where: { recoveryKey } });
     if (user !== null) {
+      const hashPassword = await bcrypt.hash(password, 3);
+      user.password = hashPassword;
+      user.recoveryKey = null;
+      await user.save();
       apiResponse.addData(user);
       return apiResponse;
     } else {
-      apiResponse.setError("recoveryLink", "Некорректная ссылка активации");
+      apiResponse.setError("recoveryLink", "Некорректный проверочный код");
       throw ApiError.BadRequest(apiResponse);
     }
   }
@@ -87,9 +108,16 @@ class UserService {
             `Восстановления пароля по номеру телефона ${login} не возможно, обратитесь в службу поддержки.`
           );
         } else {
-          //await функция по восстановлению пароля через телефон()
+          const key = keyRecoveryGen();
+          await User.update(
+            {
+              recoveryKey: key,
+            },
+            { where: { [loginType]: login } }
+          );
+          //await функция отправки пароля для востановления на телефон(key);
           apiResponse.addData({
-            passwordRecovery: "На ваш номер телефона была отправленна ссылка восстановления пароля.",
+            passwordRecovery: "На ваш номер телефона была отправлен проверочный код восстановления пароля.",
           });
         }
       } else if (loginType == "email") {
@@ -99,10 +127,16 @@ class UserService {
             `Восстановления пароля по почтовому адресу ${login} не возможно, обратитесь в службу поддержки.`
           );
         } else {
-          //await функция по восстановлению пароля через почту()
-          //await MailService.sendRecoveryMail(loginNormal, `${process.env.CLIENT_URL}/роут рековери`);
+          const key = keyRecoveryGen();
+          await User.update(
+            {
+              recoveryKey: key,
+            },
+            { where: { [loginType]: login } }
+          );
+          //await функция отправки пароля для востановления на почту(key)
           apiResponse.addData({
-            passwordRecovery: "На ваш почтовый адрес была отправленна ссылка восстановления пароля.",
+            passwordRecovery: "На ваш почтовый адрес был отправлен проверочный код восстановления пароля.",
           });
         }
       }

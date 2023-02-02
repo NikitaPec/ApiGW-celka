@@ -11,7 +11,7 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare isActivatedEmail: boolean;
   declare isActivatedPhone: boolean;
   declare activationLink: string | null;
-  declare recoveryLink: string | null;
+  declare recoveryKey: string | null;
 }
 
 User.init(
@@ -25,7 +25,7 @@ User.init(
     isActivatedEmail: { type: DataTypes.BOOLEAN, defaultValue: false },
     isActivatedPhone: { type: DataTypes.BOOLEAN, defaultValue: false },
     activationLink: { type: DataTypes.STRING },
-    recoveryLink: { type: DataTypes.STRING },
+    recoveryKey: { type: DataTypes.STRING },
   },
   { sequelize, modelName: "User" }
 );
