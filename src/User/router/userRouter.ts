@@ -7,9 +7,9 @@ router.post("/registration", UserController.registration);
 router.post("/recovery", UserController.recovery);
 router.post("/login", UserController.login);
 router.post("/logout", UserController.logout);
-router.get("/get-key-password-recovery", UserController.passwordRecovery);
+router.post("/edit", authMiddleWare, UserController.edit);
+router.get("/get-key-password-recovery", UserController.getKeyRecoveryPass);
 router.get("/check-auth", authMiddleWare, UserController.checkAuth);
 router.get("/activate/:link", UserController.activate);
 router.get("/refresh", UserController.refresh);
-
 export default router;

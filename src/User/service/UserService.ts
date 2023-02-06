@@ -6,41 +6,18 @@ import UserDto from "../dto/UserDto.js";
 import ApiError from "../../exception/ApiError.js";
 import ApiResponse from "../../dto/ApiResponseDto.js";
 import Validdata from "../../utils/Validdata.js";
-
-function keyRecoveryGen() {
-  const symbols = "ABDEFGHKMNPQRSTWXZ123456789";
-  let key = "";
-  for (let i = 0; i < 4; i += 1) {
-    const position = Math.floor(Math.random() * symbols.length);
-    key += symbols.substring(position, position + 1);
-  }
-  return key;
-}
-
-async function checkLogin(login: string, apiResponse: ApiResponse) {
-  let messageBadLogin = `Пользователь с почтовым адресом ${login} не существует`;
-  const loginType = Validdata.loginTupe(login);
-  if (loginType == "phone") {
-    login = Validdata.phoneFormat(login);
-    messageBadLogin = `Пользователь с номером телефона ${login} не существует`;
-  }
-  const user = await User.findOne({ where: { [loginType]: login } });
-  if (user == null) {
-    apiResponse.setError("login", messageBadLogin);
-  }
-  return { user, loginType, login };
-}
+import CreatingKeys from "../../utils/CreatingKeys.js";
 
 class UserService {
   async registration(login: string, password: string, confirm: string) {
     const apiResponse = new ApiResponse();
     Validdata.checkLogin(login, apiResponse);
     Validdata.checkPassword(password, confirm, apiResponse);
-    await Validdata.candidate(login, apiResponse);
+    await Validdata.candidate(login, apiResponse, "check");
     if (!apiResponse.isSuccess()) {
       throw ApiError.ValidationException(apiResponse);
     }
-    const loginType = Validdata.loginTupe(login);
+    const loginType = Validdata.loginType(login);
     if (loginType == "phone") {
       login = Validdata.phoneFormat(login);
     }
@@ -88,7 +65,8 @@ class UserService {
       user.password = hashPassword;
       user.recoveryKey = null;
       await user.save();
-      apiResponse.addData(user);
+      const userDto = new UserDto(user);
+      apiResponse.addData(userDto);
       return apiResponse;
     } else {
       apiResponse.setError("recoveryLink", "Некорректный проверочный код");
@@ -96,49 +74,41 @@ class UserService {
     }
   }
 
-  async passwordRecovery(loginUser: string) {
+  async getKeyRecoveryPass(login: string) {
     const apiResponse = new ApiResponse();
-    const { user, loginType, login } = await checkLogin(loginUser, apiResponse);
+    const user = await Validdata.candidate(login, apiResponse, "search");
     if (user !== null) {
+      let messageTypeLogin = "почтовый адрес";
       const userDto = new UserDto(user);
+      const loginType = Validdata.loginType(login);
       if (loginType == "phone") {
-        if (userDto.isActivatedPhone == false) {
-          apiResponse.setError(
-            "login",
-            `Восстановления пароля по номеру телефона ${login} не возможно, обратитесь в службу поддержки.`
-          );
-        } else {
-          const key = keyRecoveryGen();
-          await User.update(
-            {
-              recoveryKey: key,
-            },
-            { where: { [loginType]: login } }
-          );
+        messageTypeLogin = "номер телефона";
+        login = Validdata.phoneFormat(login);
+      }
+      if (
+        (loginType == "phone" && userDto.isActivatedPhone == false) ||
+        (loginType == "email" && userDto.isActivatedEmail == false)
+      ) {
+        apiResponse.setError(
+          "login",
+          `Вы не подтвердили свой ${messageTypeLogin} ${login} восстановления не возможно, обратитесь в службу поддержки.`
+        );
+      } else {
+        const key = CreatingKeys.keyRecoveryPass();
+        await User.update(
+          {
+            recoveryKey: key,
+          },
+          { where: { [loginType]: login } }
+        );
+        if (loginType == "phone") {
           //await функция отправки пароля для востановления на телефон(key);
-          apiResponse.addData({
-            passwordRecovery: "На ваш номер телефона была отправлен проверочный код восстановления пароля.",
-          });
-        }
-      } else if (loginType == "email") {
-        if (userDto.isActivatedEmail == false) {
-          apiResponse.setError(
-            "login",
-            `Восстановления пароля по почтовому адресу ${login} не возможно, обратитесь в службу поддержки.`
-          );
         } else {
-          const key = keyRecoveryGen();
-          await User.update(
-            {
-              recoveryKey: key,
-            },
-            { where: { [loginType]: login } }
-          );
           //await функция отправки пароля для востановления на почту(key)
-          apiResponse.addData({
-            passwordRecovery: "На ваш почтовый адрес был отправлен проверочный код восстановления пароля.",
-          });
         }
+        apiResponse.addData({
+          message: `На ваш ${messageTypeLogin} ${login} был отправлен проверочный код восстановления пароля.`,
+        });
       }
     }
     if (!apiResponse.isSuccess()) {
@@ -149,7 +119,7 @@ class UserService {
 
   async login(login: string, password: string) {
     const apiResponse = new ApiResponse();
-    const { user } = await checkLogin(login, apiResponse);
+    const user = await Validdata.candidate(login, apiResponse, "search");
     if (user !== null) {
       const passwordCheck = await bcrypt.compare(password, user.password);
       if (!passwordCheck) {
@@ -178,6 +148,29 @@ class UserService {
     }
     await TokenService.removeToken(refreshToken);
     return apiResponse;
+  }
+
+  async edit(id: string, email: string, phone: string, password: string, newPassword: string, confirm: string) {
+    const apiResponse = new ApiResponse();
+    const user = await User.findOne({ where: { id } });
+    if (user) {
+      if (email) {
+        user.email = email;
+        user.isActivatedEmail = false;
+        await user.save();
+        //await MailService.sendActivationMail(email, `${process.env.API_URL}/api/activate/${activationLink}`);
+      } else if (phone) {
+        user.phone = phone;
+        user.isActivatedPhone = false;
+        await user.save();
+        //отправить ссылку на активацию телефона;
+      } else if (password) {
+      }
+      const userDto = new UserDto(user);
+      return apiResponse;
+    } else {
+      apiResponse.setError("id", "Не авторизован");
+    }
   }
 
   async refresh(refreshToken: string) {

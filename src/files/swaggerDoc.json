@@ -217,8 +217,24 @@
                 "description": "Выход пользователя и стирание refreshToken из cookie и удаление его из базы данных."
             }
         },
-        "/api/check-auth": {
+        "/api/recovery": {
             "post": {
+                "tags": [
+                    "api"
+                ],
+                "description": "Восстановление доступа к акаунту."
+            }
+        },
+        "/api/edit": {
+            "post": {
+                "tags": [
+                    "api"
+                ],
+                "description": "Редактирование данных пользователя."
+            }
+        },
+        "/api/check-auth": {
+            "get": {
                 "tags": [
                     "api"
                 ],

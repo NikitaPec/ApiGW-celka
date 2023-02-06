@@ -3,6 +3,15 @@ import ApiResponse from "../../dto/ApiResponseDto.js";
 import { NextFunction, Request, Response } from "express";
 
 class UserController {
+  async edit(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { id = "", email = "", phone = "", password = "", newPassword = "", confirm = "" } = req.body;
+      const apiResponse = await UserService.edit(id, email, phone, password, newPassword, confirm);
+      return res.json(apiResponse);
+    } catch (error) {
+      next(error);
+    }
+  }
   async registration(req: Request, res: Response, next: NextFunction) {
     try {
       const { login = "", password = "", confirm = "" } = req.body;
@@ -18,10 +27,10 @@ class UserController {
     }
   }
 
-  async passwordRecovery(req: Request, res: Response, next: NextFunction) {
+  async getKeyRecoveryPass(req: Request, res: Response, next: NextFunction) {
     try {
       const { login = "" } = req.body;
-      const apiResponse = await UserService.passwordRecovery(login);
+      const apiResponse = await UserService.getKeyRecoveryPass(login);
       return res.json(apiResponse);
     } catch (error) {
       next(error);
