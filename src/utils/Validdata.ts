@@ -38,7 +38,7 @@ class Validdata {
   phoneFormat(phone: string): string {
     return phone.replace(/(\+7|8)[\s(]?(\d{3})[\s)]?(\d{3})[\s-]?(\d{2})[\s-]?(\d{2})/g, "+7($2)$3-$4-$5");
   }
-
+ 
   async candidate(login: string, apiResponse?: ApiResponse, method?: string): Promise<User | null> {
     //При method == "check" (ошибка если существует)
     //При method == "search" (ошибка если не существует)

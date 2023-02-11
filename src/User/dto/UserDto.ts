@@ -4,7 +4,9 @@ interface model {
   id: string | number;
   isActivatedEmail: boolean;
   isActivatedPhone: boolean;
-  name: string | null;
+  name: string;
+  surname: string | null;
+  patronymic: string | null;
   role: string;
 }
 
