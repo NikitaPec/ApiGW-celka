@@ -10,7 +10,7 @@ import { IReqEdit } from "../controller/UserController.js";
 
 class UserService {
   async registration(login: string, password: string, confirm: string) {
-    login = login.toLowerCase();
+    login = login.charAt(0).toUpperCase() + login.toLowerCase().slice(1);
     const apiResponse = new ApiResponse();
     Validdata.checkLogin(login, apiResponse);
     Validdata.checkPassword(password, confirm, apiResponse);
@@ -73,7 +73,7 @@ class UserService {
   }
 
   async getKeyRecoveryPass(login: string) {
-    login = login.toLowerCase();
+    login = login.charAt(0).toUpperCase() + login.toLowerCase().slice(1);
     const apiResponse = new ApiResponse();
     const user = await Validdata.candidate(login, apiResponse, "search");
     if (user !== null) {
@@ -117,7 +117,7 @@ class UserService {
   }
 
   async login(login: string, password: string) {
-    login = login.toLowerCase();
+    login = login.charAt(0).toUpperCase() + login.toLowerCase().slice(1);
     const apiResponse = new ApiResponse();
     const user = await Validdata.candidate(login, apiResponse, "search");
     if (user !== null) {
@@ -163,6 +163,7 @@ class UserService {
     const user = await User.findOne({ where: { id: data.id } });
     if (user) {
       if (data.email) {
+        data.email = data.email.charAt(0).toUpperCase() + data.email.toLowerCase().slice(1);
         data.email = data.email.toLowerCase();
         data.email !== user.email
           ? await Validdata.candidate(data.email, apiResponse, "check")
