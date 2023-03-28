@@ -17,6 +17,8 @@ export default class UserDto {
   isActivatedEmail;
   isActivatedPhone;
   name;
+  surname;
+  patronymic;
   role;
 
   constructor(model: model) {
@@ -26,6 +28,8 @@ export default class UserDto {
     this.isActivatedEmail = model.isActivatedEmail;
     this.isActivatedPhone = model.isActivatedPhone;
     this.name = model.name;
+    this.surname = model.surname;
+    this.patronymic = model.patronymic;
     this.role = model.role;
   }
 }

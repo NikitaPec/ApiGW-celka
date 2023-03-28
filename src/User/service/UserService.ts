@@ -7,6 +7,7 @@ import ApiResponse from "../../dto/ApiResponseDto.js";
 import Validdata from "../../utils/Validdata.js";
 import CreatingKeys from "../../utils/CreatingKeys.js";
 import { IReqEdit } from "../controller/UserController.js";
+import { windows } from "rimraf";
 
 class UserService {
   async registration(login: string, password: string, confirm: string) {
@@ -156,6 +157,7 @@ class UserService {
 
   async edit(data: IReqEdit) {
     const apiResponse = new ApiResponse();
+    console.log(data);
     if (!data.id) {
       apiResponse.setError("id", "Не указан Id пользователя.");
       throw ApiError.BadRequest(apiResponse);
@@ -164,23 +166,19 @@ class UserService {
     if (user) {
       if (data.email) {
         data.email = data.email.charAt(0).toUpperCase() + data.email.toLowerCase().slice(1);
-        data.email = data.email.toLowerCase();
-        data.email !== user.email
-          ? await Validdata.candidate(data.email, apiResponse, "check")
-          : apiResponse.setError("login", "Почтовые адреса совпадают.");
-        Validdata.checkLogin(data.email, apiResponse);
-        if (!apiResponse.isSuccess()) {
+        //data.email = data.email.toLowerCase();
+        await Validdata.candidate(data.email, apiResponse, "check");
+        Validdata.checkLogin(data.email, apiResponse, "email");
+        if (apiResponse.isSuccess()) {
           user.email = data.email;
           user.isActivatedEmail = false;
         }
       }
       if (data.phone) {
         data.phone = Validdata.phoneFormat(data.phone);
-        data.phone !== user.phone
-          ? await Validdata.candidate(data.phone, apiResponse, "check")
-          : apiResponse.setError("login", "Телефонные номера совпадают.");
-        Validdata.checkLogin(data.phone, apiResponse);
-        if (!apiResponse.isSuccess()) {
+        await Validdata.candidate(data.phone, apiResponse, "check");
+        Validdata.checkLogin(data.phone, apiResponse, "phone");
+        if (apiResponse.isSuccess()) {
           user.phone = data.phone;
           user.isActivatedPhone = false;
         }
@@ -254,5 +252,4 @@ class UserService {
     return users;
   }
 }
-
 export default new UserService();

@@ -17,7 +17,8 @@ export interface IReqEdit {
 class UserController {
   async edit(req: Request, res: Response, next: NextFunction) {
     try {
-      const data: IReqEdit = req.body;
+      console.log(req.body);
+      const data: IReqEdit = req.body.user;
       const apiResponse = await UserService.edit(data);
       res.cookie("refreshToken", apiResponse.data.refreshToken, {
         maxAge: 2592000000,
