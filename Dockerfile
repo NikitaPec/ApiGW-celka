@@ -1,10 +1,10 @@
-FROM node:16.13.0-alpine
+FROM node:18.15.0-alpine
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
 COPY ["package.json", "package-lock.json", "./"]
 
-RUN npm install --silent
+RUN npm install
 
 COPY . .
 
